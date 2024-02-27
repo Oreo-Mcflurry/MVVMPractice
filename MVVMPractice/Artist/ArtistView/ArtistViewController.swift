@@ -12,6 +12,7 @@ class ArtistViewController: BaseViewController {
 
 	let collectionView = UICollectionView(frame: .zero, collectionViewLayout: setCollectionViewLayout())
 	let viewModel = ArtistViewModel()
+	let searchTextField = UISearchTextField()
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -20,15 +21,33 @@ class ArtistViewController: BaseViewController {
 		viewModel.artistInfo.bind { _ in
 			self.collectionView.reloadData()
 		}
+
+//		viewModel.searchName.bind { [weak self] _ in
+//			self?.collectionView.reloadData()
+//		}
+
+		let button = UIBarButtonItem(title: "Test", style: .plain, target: self, action: #selector(test))
+		navigationItem.rightBarButtonItem = button
+	}
+
+	@objc func test() {
+		collectionView.reloadData()
 	}
 
 	override func configureHierarchy() {
+		view.addSubview(searchTextField)
 		view.addSubview(collectionView)
 	}
 
 	override func configureLayout() {
+		searchTextField.snp.makeConstraints {
+			$0.top.equalTo(view.safeAreaLayoutGuide)
+			$0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(20)
+		}
+
 		collectionView.snp.makeConstraints {
-			$0.edges.equalToSuperview()
+			$0.top.equalTo(searchTextField.snp.bottom).offset(20)
+			$0.horizontalEdges.bottom.equalTo(view.safeAreaLayoutGuide)
 		}
 	}
 
@@ -59,5 +78,11 @@ extension ArtistViewController: UICollectionViewDelegate, UICollectionViewDataSo
 		collectionView.dataSource = self
 		collectionView.delegate = self
 		collectionView.register(ArtistCollectionViewCell.self, forCellWithReuseIdentifier: ArtistCollectionViewCell.description())
+	}
+}
+
+extension ArtistViewController: UISearchBarDelegate {
+	func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+		viewModel.searchName.value = searchText
 	}
 }
